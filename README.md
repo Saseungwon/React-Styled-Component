@@ -1,70 +1,190 @@
-# Getting Started with Create React App
+## Styled Component
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Create React App 에서 지원되는 import 방식이나 module 방식이 아니라 별도의 라이브러리를 이용
+장점 : 스코프 오염 방지할 수 있음
+단점 : 전역적으로 처리해주고 싶을 때는 어려울 수도 있다.(글로벌 스타일 기능 지원해줘서 사용 가능)
 
-## Available Scripts
+- 설치
 
-In the project directory, you can run:
+```
+npm i styled-components
+```
 
-### `npm start`
+### 정리
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- App.js
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```js
+import StyledButton from "./components/StyledButton";
+import styled from "styled-components";
+import { createGlobalStyle } from "styled-components";
+import StyledA from "./components/StyledA";
 
-### `npm test`
+// 버튼3 : 기존에 있던 StyledButton에 다시 새로운 스타일 먹이기
+const PrimaryStyledButton = styled(StyledButton)`
+  background: palevioletred;
+  color: white;
+`;
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+// 버튼5
+const UppercaseButton = (props) => (
+  <button {...props} children={props.children.toUpperCase()} />
+);
 
-### `npm run build`
+// 버튼6
+const MyButton = (props) => (
+  <button className={props.className} children={`MyButton ${props.children}`} />
+);
+// 버튼7 : ${(props) => props.color || "palevioletred"} 조건부로 props
+const StyledMyButton = styled(MyButton)`
+  background: transparent;
+  border-radius: 3px;
+  border: 2px solid ${(props) => props.color || "palevioletred"};
+  color: ${(props) => props.color || "palevioletred"};
+  margin: 0 1em;
+  padding: 0.25em 1em;
+  font-size: 20px;
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+  :hover {
+    border: 2px solid red;
+  }
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+  ::before {
+    content: "@";
+  }
+`;
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+// Global Style :  styled-component의 전역속성 적용이 어려운 단점을 커버해줌
+const GlobalStyles = createGlobalStyle`
+button {
+  color: yellow;
+}
+`;
 
-### `npm run eject`
+function App() {
+  return (
+    <div className="App">
+      {/* 전역속성 적용이 어려운 단점을 커버해주는 GlobalStyles 기능은 적용할 부분 위에 놓기 */}
+      <GlobalStyles />
+      <header className="App-header">
+        <img src={logo} className="App-logo" alt="logo" />
+        <p>
+          {/* <button class="sc-bczRLJ">버튼</button> Styled Component로 클래스를 지정하지 않았는데 자동으로 들어가있음 */}
+          <StyledButton>버튼1</StyledButton>
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+          <StyledButton primary>버튼2</StyledButton>
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+          <PrimaryStyledButton>버튼3</PrimaryStyledButton>
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+          {/* as="a" -> a태그처럼 쓰겠다 */}
+          <StyledButton as="a" href="/">
+            버튼4
+          </StyledButton>
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+          {/* as를 이용해 특정 컴포넌트를 넣어줄 수도 있다. */}
+          <StyledButton as={UppercaseButton}>버튼5button</StyledButton>
 
-## Learn More
+          <StyledMyButton as={UppercaseButton}>버튼6</StyledMyButton>
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+          {/* props를 인자로 받아서 조건부로 사용할 수 있다. */}
+          <StyledMyButton color="green">버튼7</StyledMyButton>
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+          <StyledA href="https://google.com">태그</StyledA>
+        </p>
+      </header>
+    </div>
+  );
+}
 
-### Code Splitting
+export default App;
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- StyledButton.jsx
 
-### Analyzing the Bundle Size
+```jsx
+import styled from "styled-components";
+import { css } from "styled-components";
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+// 겹치지 않게 class 이름 생성해주고, `` 내에 css 문법 작성하여 편하게 사용가능
+// 이미 있는 버튼에 특정 props일 때 다른 스타일 먹일 때 &{} 를 사용해서 다르게 만들기 가능
+const StyledButton = styled.button`
+  background: transparent;
+  border-radius: 3px;
+  border: 2px solid palevioletred;
+  color: palevioletred;
+  margin: 0 1em;
+  padding: 0.25em 1em;
+  font-size: 20px;
 
-### Making a Progressive Web App
+  ${(props) =>
+    props.primary &&
+    css`
+      background: palevioletred;
+      color: white;
+    `}
+`;
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+export default StyledButton;
+```
 
-### Advanced Configuration
+- StyledA.jsx
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```jsx
+import styled from "styled-components";
 
-### Deployment
+// attr을 지정해주면 js에서 일일히 지정해주지 않아도 default로 지정해줄 수 있다.
+const StyledA = styled.a.attrs((props) => ({
+  target: "_blank", // 새창에서 열기
+}))`
+  color: ${(props) => props.color};
+`;
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+export default StyledA;
+```
 
-### `npm run build` fails to minify
+<br>
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### GlobalStyle
+
+styled-component의 전역속성 적용이 어려운 단점을 커버해줌
+
+```js
+// App.js
+const GlobalStyles = createGlobalStyle`
+button {
+  color: yellow;
+}
+`;
+
+function App() {
+  return (
+    <div className="App">
+      {/* 전역속성 적용이 어려운 단점을 커버해주는 GlobalStyles 기능은 적용할 부분 위에 놓기 */}
+      <GlobalStyles />
+      <header className="App-header">
+        <p>
+          <StyledButton>버튼1</StyledButton>
+        </p>
+      </header>
+    </div>
+  );
+}
+```
+
+<br>
+
+### attr로 default 설정
+
+```js
+// StyleA.jsx
+const StyledA = styled.a.attrs((props) => ({
+  target: "_blank", // 새창에서 열기
+}))`
+  color: ${(props) => props.color};
+`;
+
+export default StyledA;
+
+// App.js
+<StyledA href="https://google.com">태그</StyledA>;
+```
